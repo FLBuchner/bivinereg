@@ -55,3 +55,17 @@ p-value derived from a likelihood ratio test.
 Sequential estimation of a regression Y-vine for the purpose of quantile
 prediction as described in TODO.
 }
+\examples{
+# load sample data
+data(data)
+
+# fit vine regression model
+(fit <- bivinereg(cbind(U1,U4) ~ U2 + U3 + U5 + U6,
+                  data = data,
+                  family_set = "parametric",
+                  selcrit = "bic"))
+
+# inspect model
+summary(fit)
+
+}

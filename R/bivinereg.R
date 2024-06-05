@@ -30,6 +30,19 @@
 #'   shows the contribution of each selected variable with the associated
 #'   p-value derived from a likelihood ratio test.
 #'
+#' @examples
+#' # load sample data
+#' data(data)
+#'
+#' # fit vine regression model
+#' (fit <- bivinereg(cbind(U1,U4) ~ U2 + U3 + U5 + U6,
+#'                   data = data,
+#'                   family_set = "parametric",
+#'                   selcrit = "bic"))
+#'
+#' # inspect model
+#' summary(fit)
+#'
 #' @export
 #'
 #' @importFrom kde1d kde1d pkde1d
