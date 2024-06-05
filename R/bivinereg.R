@@ -128,9 +128,9 @@ finalize_bivinereg_object <- function(formula, selcrit, model_frame, margins, vi
   stats <- list(
     nobs = nobs,
     edf = edf,
-    cll = cll,
-    caic = caic,
-    cbic = cbic,
+    acll = cll,
+    acaic = caic,
+    acbic = cbic,
     var_edf = var_edf,
     var_cll = var_cll,
     var_caic = var_caic,

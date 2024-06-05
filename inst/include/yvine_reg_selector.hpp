@@ -30,6 +30,7 @@ struct DVineFitTemporaries
   std::vector<Eigen::VectorXd> hfunc2;
   std::vector<Eigen::VectorXd> hfunc1_sub;
   std::vector<Eigen::VectorXd> hfunc2_sub;
+  Eigen::VectorXd hfunc2_resp;
   std::vector<Bicop> pcs;
   std::vector<size_t> remaining_vars;
   std::vector<size_t> selected_vars;
@@ -122,6 +123,7 @@ inline YVineRegSelector::YVineRegSelector(
   fit1_.crit = 0.0;
 
   fit1_.hfunc2[0] = data_.col(0);
+  fit1_.hfunc2_resp = data_.col(0);
 
   fit2_.hfunc1.resize(p_);
   fit2_.hfunc2.resize(p_);
@@ -133,6 +135,7 @@ inline YVineRegSelector::YVineRegSelector(
   fit2_.crit = 0.0;
 
   fit2_.hfunc2[0] = data_.col(1);
+  fit2_.hfunc2_resp = data_.col(2);
 }
 
 
@@ -179,8 +182,8 @@ inline void YVineRegSelector::select_model()
   // need to fit pair copula between responses at the end
   auto p_sel = fit1_.selected_vars.size();
   Eigen::MatrixXd u_e(data_.rows(), 2);
-  u_e.col(0) = fit1_.hfunc2[p_sel - 1];
-  u_e.col(1) = fit2_.hfunc2[p_sel - 1];
+  u_e.col(0) = fit1_.hfunc2_resp;
+  u_e.col(1) = fit2_.hfunc2_resp;
 
   std::vector<std::string> var_types;
   var_types.push_back("c");
@@ -191,15 +194,6 @@ inline void YVineRegSelector::select_model()
   pc_final.set_var_types(var_types);
   pc_final.select(u_e, controls_);
   pcs_.push_back(std::vector<Bicop>{ pc_final });
-
-  // std::cout << "Final pair copulas: \n";
-  // for (size_t t = 0; t <= p_sel; t++) {
-  //   for (size_t k = 0; k <= (p_sel - t); k++) {
-  //     std::cout << pcs_[t][k].get_family_name() << ", ";
-  //   }
-  //   std::cout << "\n";
-  // }
-
 }
 
 inline void YVineRegSelector::extend_fit(DVineFitTemporaries& fit1,
@@ -296,15 +290,17 @@ inline void YVineRegSelector::update_hfunc1(DVineFitTemporaries& fit,
                                             size_t t,
                                             const Eigen::MatrixXd& u_e) const
 {
-  if (p_ == t + 1) // selection is complete
-    return;
-  fit.hfunc1[t + 1] = fit.pcs[t].hfunc1(u_e);
-  if (fit.hfunc1_sub[t].size()) { // second variable is discrete
-    auto u_e_sub = u_e;
-    u_e_sub.col(1) = u_e.col(3);
-    fit.hfunc1_sub[t + 1] = fit.pcs[t].hfunc1(u_e_sub);
+  if (p_ == t + 1) { // selection is complete
+    fit.hfunc2_resp = fit.pcs[t].hfunc2(u_e);
   } else {
-    fit.hfunc1_sub[t + 1] = Eigen::VectorXd();
+    fit.hfunc1[t + 1] = fit.pcs[t].hfunc1(u_e);
+    if (fit.hfunc1_sub[t].size()) { // second variable is discrete
+      auto u_e_sub = u_e;
+      u_e_sub.col(1) = u_e.col(3);
+      fit.hfunc1_sub[t + 1] = fit.pcs[t].hfunc1(u_e_sub);
+    } else {
+      fit.hfunc1_sub[t + 1] = Eigen::VectorXd();
+    }
   }
 }
 
