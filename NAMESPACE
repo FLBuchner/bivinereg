@@ -3,6 +3,7 @@
 S3method(print,bivinereg)
 S3method(summary,bivinereg)
 export(bivinereg)
+export(summary_yvine)
 importFrom(Rcpp,sourceCpp)
 importFrom(kde1d,kde1d)
 importFrom(kde1d,pkde1d)
