@@ -35,7 +35,7 @@ bicpdf <- function(object, newdata, cores = 1) {
 #' @param object an object of class \code{bivinereg}.
 #' @param newdata matrix of response and covariate values for which to compute
 #'   the bivariate conditional density.
-#' @param margin integer; the margin for which to calculate the conditional pdf.
+#' @param margin integer; the margin for which to calculate the conditional PDF.
 #' @param cores integer; the number of cores to use for computations.
 #'
 #' @examples
