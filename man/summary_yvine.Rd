@@ -26,6 +26,8 @@ numbers or "ALL" (default) to print all trees.}
 numbers or "ALL" (default) for all rows.}
 
 \item{names_cols}{A vector of names of columns to be printed in the summary.}
+
+\item{...}{Additional parameters for \code{print.data.frame}.}
 }
 \description{
 A summary for Y-vines tailored to Y-vine regression.

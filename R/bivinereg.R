@@ -1,7 +1,7 @@
 #' Y-vine regression models
 #'
-#' Sequential estimation of a regression Y-vine for the purpose of quantile
-#' prediction as described in TODO.
+#' Sequential estimation of a regression Y-vine as described in Tepegjozova and
+#' Czado (2022).
 #'
 #' @param formula an object of class "formula"; same as [lm()].
 #' @param data data frame (or object coercible by [as.data.frame()]) containing
@@ -10,9 +10,6 @@
 #' @param selcrit selection criterion based on conditional log-likelihood.
 #'   \code{"loglik"} (default) imposes no correction; other choices are
 #'   \code{"aic"} and \code{"bic"}.
-#' @param par_1d list of options passed to [kde1d::kde1d()], must be one value
-#'   for each margin, e.g. `list(xmin = c(0, 0, NaN))` if the response and first
-#'   covariate have non-negative support.
 #' @param weights optional vector of weights for each observation.
 #' @param cores integer; the number of cores to use for computations.
 #' @param ... further arguments passed to [rvinecopulib::bicop()].
@@ -21,14 +18,20 @@
 #'   \describe{ \item{formula}{the formula used for the fit.}
 #'   \item{selcrit}{criterion used for variable selection.}
 #'   \item{model_frame}{the data used to fit the regression model.}
-#'   \item{margins}{list of marginal models fitted by [kde1d::kde1d()].}
+#'   \item{margins}{list of marginal models (not used).}
 #'   \item{vine}{an [rvinecopulib::vinecop_dist()] object containing the fitted
-#'   D-vine.} \item{stats}{fit statistics such as conditional
+#'   Y-vine.} \item{stats}{fit statistics such as conditional
 #'   log-likelihood/AIC/BIC and p-values for each variable's contribution.}
 #'   \item{order}{order of the covariates chosen by the variable selection
-#'   algorithm.} \item{selected_vars}{indices of selected variables.} } `summary.bivinereg()`
-#'   shows the contribution of each selected variable with the associated
-#'   p-value derived from a likelihood ratio test.
+#'   algorithm.} \item{selected_vars}{indices of selected variables.} }
+#'   `summary.bivinereg()` shows the contribution of each selected variable with
+#'   the associated p-value derived from a likelihood ratio test.
+#'   `summary_yvine()` gives a more detailed and flexible summary of the fitted
+#'   Y-vine.
+#'
+#' @references Tepegjozova and Czado (2022), Bivariate vine copula based
+#' regression, bivariate level and quantile curves,
+#' https://arxiv.org/abs/2205.02557
 #'
 #' @examples
 #' # load sample data
@@ -45,15 +48,13 @@
 #'
 #' @export
 #'
-#' @importFrom kde1d kde1d pkde1d
 #' @importFrom stats model.frame logLik model.extract
 #' @importFrom utils modifyList
 #' @importFrom rvinecopulib bicop vinecop
 #' @importFrom Rcpp sourceCpp
 #' @useDynLib bivinereg, .registration = TRUE
 bivinereg <- function(formula, data, family_set = "parametric", selcrit = "aic",
-                    par_1d = list(), weights = numeric(),
-                    cores = 1, ...) {
+                      weights = numeric(), cores = 1, ...) {
   # remove unused variables
   if (!missing(data)) {
     mf <- model.frame(formula, data)

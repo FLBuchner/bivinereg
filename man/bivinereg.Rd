@@ -9,7 +9,6 @@ bivinereg(
   data,
   family_set = "parametric",
   selcrit = "aic",
-  par_1d = list(),
   weights = numeric(),
   cores = 1,
   ...
@@ -27,10 +26,6 @@ the variables in the model.}
 \code{"loglik"} (default) imposes no correction; other choices are
 \code{"aic"} and \code{"bic"}.}
 
-\item{par_1d}{list of options passed to \code{\link[kde1d:kde1d]{kde1d::kde1d()}}, must be one value
-for each margin, e.g. \code{list(xmin = c(0, 0, NaN))} if the response and first
-covariate have non-negative support.}
-
 \item{weights}{optional vector of weights for each observation.}
 
 \item{cores}{integer; the number of cores to use for computations.}
@@ -42,18 +37,20 @@ An object of class bivinereg. It is a list containing the elements
 \describe{ \item{formula}{the formula used for the fit.}
 \item{selcrit}{criterion used for variable selection.}
 \item{model_frame}{the data used to fit the regression model.}
-\item{margins}{list of marginal models fitted by \code{\link[kde1d:kde1d]{kde1d::kde1d()}}.}
+\item{margins}{list of marginal models (not used).}
 \item{vine}{an \code{\link[rvinecopulib:vinecop_dist]{rvinecopulib::vinecop_dist()}} object containing the fitted
-D-vine.} \item{stats}{fit statistics such as conditional
+Y-vine.} \item{stats}{fit statistics such as conditional
 log-likelihood/AIC/BIC and p-values for each variable's contribution.}
 \item{order}{order of the covariates chosen by the variable selection
-algorithm.} \item{selected_vars}{indices of selected variables.} } \code{summary.bivinereg()}
-shows the contribution of each selected variable with the associated
-p-value derived from a likelihood ratio test.
+algorithm.} \item{selected_vars}{indices of selected variables.} }
+\code{summary.bivinereg()} shows the contribution of each selected variable with
+the associated p-value derived from a likelihood ratio test.
+\code{summary_yvine()} gives a more detailed and flexible summary of the fitted
+Y-vine.
 }
 \description{
-Sequential estimation of a regression Y-vine for the purpose of quantile
-prediction as described in TODO.
+Sequential estimation of a regression Y-vine as described in Tepegjozova and
+Czado (2022).
 }
 \examples{
 # load sample data
@@ -68,4 +65,9 @@ data(data)
 # inspect model
 summary(fit)
 
+}
+\references{
+Tepegjozova and Czado (2022), Bivariate vine copula based
+regression, bivariate level and quantile curves,
+https://arxiv.org/abs/2205.02557
 }

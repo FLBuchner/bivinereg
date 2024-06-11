@@ -12,25 +12,6 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// fit_margins_cpp
-std::vector<Rcpp::List> fit_margins_cpp(const Eigen::MatrixXd& data, const Eigen::VectorXi& nlevels, const Eigen::VectorXd& mult, const Eigen::VectorXd& xmin, const Eigen::VectorXd& xmax, const Eigen::VectorXd& bw, const Eigen::VectorXi& deg, const Eigen::VectorXd& weights, size_t num_threads);
-RcppExport SEXP _bivinereg_fit_margins_cpp(SEXP dataSEXP, SEXP nlevelsSEXP, SEXP multSEXP, SEXP xminSEXP, SEXP xmaxSEXP, SEXP bwSEXP, SEXP degSEXP, SEXP weightsSEXP, SEXP num_threadsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type data(dataSEXP);
-    Rcpp::traits::input_parameter< const Eigen::VectorXi& >::type nlevels(nlevelsSEXP);
-    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type mult(multSEXP);
-    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type xmin(xminSEXP);
-    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type xmax(xmaxSEXP);
-    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type bw(bwSEXP);
-    Rcpp::traits::input_parameter< const Eigen::VectorXi& >::type deg(degSEXP);
-    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type weights(weightsSEXP);
-    Rcpp::traits::input_parameter< size_t >::type num_threads(num_threadsSEXP);
-    rcpp_result_gen = Rcpp::wrap(fit_margins_cpp(data, nlevels, mult, xmin, xmax, bw, deg, weights, num_threads));
-    return rcpp_result_gen;
-END_RCPP
-}
 // select_yvine_cpp
 Rcpp::List select_yvine_cpp(const Eigen::MatrixXd& data, std::vector<std::string> family_set, std::string par_method, std::string nonpar_method, double mult, std::string selcrit, const Eigen::VectorXd& weights, double psi0, bool preselect_families, size_t cores, const std::vector<std::string>& var_types);
 RcppExport SEXP _bivinereg_select_yvine_cpp(SEXP dataSEXP, SEXP family_setSEXP, SEXP par_methodSEXP, SEXP nonpar_methodSEXP, SEXP multSEXP, SEXP selcritSEXP, SEXP weightsSEXP, SEXP psi0SEXP, SEXP preselect_familiesSEXP, SEXP coresSEXP, SEXP var_typesSEXP) {
@@ -52,10 +33,53 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cond_m_dist_cpp
+Eigen::VectorXd cond_m_dist_cpp(const Eigen::MatrixXd& u, const Rcpp::List& vinecop_r, const int margin, size_t num_threads);
+RcppExport SEXP _bivinereg_cond_m_dist_cpp(SEXP uSEXP, SEXP vinecop_rSEXP, SEXP marginSEXP, SEXP num_threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type u(uSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::List& >::type vinecop_r(vinecop_rSEXP);
+    Rcpp::traits::input_parameter< const int >::type margin(marginSEXP);
+    Rcpp::traits::input_parameter< size_t >::type num_threads(num_threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cond_m_dist_cpp(u, vinecop_r, margin, num_threads));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cond_bi_dens_cpp
+Eigen::VectorXd cond_bi_dens_cpp(const Eigen::MatrixXd& u, const Rcpp::List& vinecop_r, size_t num_threads);
+RcppExport SEXP _bivinereg_cond_bi_dens_cpp(SEXP uSEXP, SEXP vinecop_rSEXP, SEXP num_threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type u(uSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::List& >::type vinecop_r(vinecop_rSEXP);
+    Rcpp::traits::input_parameter< size_t >::type num_threads(num_threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cond_bi_dens_cpp(u, vinecop_r, num_threads));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cond_m_dens_cpp
+Eigen::VectorXd cond_m_dens_cpp(const Eigen::MatrixXd& u, const Rcpp::List& vinecop_r, const int margin, size_t num_threads);
+RcppExport SEXP _bivinereg_cond_m_dens_cpp(SEXP uSEXP, SEXP vinecop_rSEXP, SEXP marginSEXP, SEXP num_threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type u(uSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::List& >::type vinecop_r(vinecop_rSEXP);
+    Rcpp::traits::input_parameter< const int >::type margin(marginSEXP);
+    Rcpp::traits::input_parameter< size_t >::type num_threads(num_threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cond_m_dens_cpp(u, vinecop_r, margin, num_threads));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_bivinereg_fit_margins_cpp", (DL_FUNC) &_bivinereg_fit_margins_cpp, 9},
     {"_bivinereg_select_yvine_cpp", (DL_FUNC) &_bivinereg_select_yvine_cpp, 11},
+    {"_bivinereg_cond_m_dist_cpp", (DL_FUNC) &_bivinereg_cond_m_dist_cpp, 4},
+    {"_bivinereg_cond_bi_dens_cpp", (DL_FUNC) &_bivinereg_cond_bi_dens_cpp, 3},
+    {"_bivinereg_cond_m_dens_cpp", (DL_FUNC) &_bivinereg_cond_m_dens_cpp, 4},
     {NULL, NULL, 0}
 };
 

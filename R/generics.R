@@ -40,6 +40,7 @@ summary.bivinereg <- function(object, ...) {
 #' @param rows Specific rows of the summary to be printed. Either a vector of
 #'    numbers or "ALL" (default) for all rows.
 #' @param names_cols A vector of names of columns to be printed in the summary.
+#' @param ... Additional parameters for \code{print.data.frame}.
 #'
 #' @export
 summary_yvine <- function(object, digits = 2, trees = "ALL", rows = "ALL",
