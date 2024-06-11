@@ -12,7 +12,7 @@ mcpdf(object, newdata, margin, cores = 1)
 \item{newdata}{matrix of response and covariate values for which to compute
 the bivariate conditional density.}
 
-\item{margin}{integer; the margin for which to calculate the conditional pdf.}
+\item{margin}{integer; the margin for which to calculate the conditional PDF.}
 
 \item{cores}{integer; the number of cores to use for computations.}
 }
