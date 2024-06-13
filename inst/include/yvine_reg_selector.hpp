@@ -185,8 +185,6 @@ inline void YVineRegSelector::select_model()
   u_e.col(0) = fit1_.hfunc2_resp;
   u_e.col(1) = fit2_.hfunc2_resp;
 
-  std::cout << fit1_.hfunc2_resp[0] << ", " << fit2_.hfunc2_resp[0] << "\n";
-
   std::vector<std::string> var_types;
   var_types.push_back("c");
   var_types.push_back("c");
