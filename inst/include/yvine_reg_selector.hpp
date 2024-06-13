@@ -185,6 +185,8 @@ inline void YVineRegSelector::select_model()
   u_e.col(0) = fit1_.hfunc2_resp;
   u_e.col(1) = fit2_.hfunc2_resp;
 
+  std::cout << fit1_.hfunc2_resp[0] << ", " << fit2_.hfunc2_resp[0] << "\n";
+
   std::vector<std::string> var_types;
   var_types.push_back("c");
   var_types.push_back("c");
@@ -290,8 +292,9 @@ inline void YVineRegSelector::update_hfunc1(DVineFitTemporaries& fit,
                                             size_t t,
                                             const Eigen::MatrixXd& u_e) const
 {
+  fit.hfunc2_resp = fit.pcs[t].hfunc2(u_e);
   if (p_ == t + 1) { // selection is complete
-    fit.hfunc2_resp = fit.pcs[t].hfunc2(u_e);
+    return;
   } else {
     fit.hfunc1[t + 1] = fit.pcs[t].hfunc1(u_e);
     if (fit.hfunc1_sub[t].size()) { // second variable is discrete
