@@ -2,6 +2,10 @@
 
 An R package for Y-vine regression.
 
+## Installation
+
+    remotes::install_github("FLBuchner/bivinereg", quiet = TRUE)
+
 ## Example
 
     library(bivinereg)
