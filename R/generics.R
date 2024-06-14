@@ -56,17 +56,6 @@ summary_yvine <- function(object, digits = 2, trees = "ALL", rows = "ALL",
   names <- object$names
   d <- object$structure$d - 1
 
-  resp_alloc <- paste0("Responses:  1 = ", names[1], ", 2 = ", names[2], "\n")
-  cov_alloc <- "Covariates: "
-  for (i in 3:length(names)) {
-    cov_alloc <- paste0(cov_alloc, i, " = ", names[i])
-    if (i < length(names)) {
-      cov_alloc <- paste0(cov_alloc, ", ")
-    } else {
-      cov_alloc <- paste0(cov_alloc, "\n")
-    }
-  }
-
   if (any(rows == "ALL")) {
     if (any(trees == "ALL")) {
       rows <- 1:dim(summary_df_)[1]
@@ -88,8 +77,29 @@ summary_yvine <- function(object, digits = 2, trees = "ALL", rows = "ALL",
     }
   }
 
+  resp_alloc <- paste0("Responses:  1 = ", names[1], ", 2 = ", names[2], "\n")
+  cov_alloc <- "Covariates: "
+  nchars_line <- nchar(cov_alloc)
+
   cat("A data.frame:", dim(summary_df_)[1], "x", dim(summary_df_)[2], "\n")
   cat(resp_alloc)
+
+  for (i in 3:length(names)) {
+    cov_next <- paste0(i, " = ", names[i])
+    if ((nchars_line + nchar(cov_next)) >= 80) {
+      cat(paste0(cov_alloc, "\n"))
+      cov_alloc <- paste0("            ", cov_next)
+    } else {
+      cov_alloc <- paste0(cov_alloc, cov_next)
+    }
+    if (i < length(names)) {
+      cov_alloc <- paste0(cov_alloc, ", ")
+      nchars_line <- nchar(cov_alloc)
+    } else {
+      cov_alloc <- paste0(cov_alloc, "\n")
+    }
+  }
+
   cat(cov_alloc)
   print.data.frame(summary_df_[rows, names_cols], digits = digits,
                    row.names = FALSE, ...)
