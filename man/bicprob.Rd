@@ -9,22 +9,26 @@ bicprob(object, newdata, v1_min, v1_max, v2_min, v2_max, cores = 1)
 \arguments{
 \item{object}{an object of class \code{bivinereg}.}
 
-\item{newdata}{matrix of covariate values for which to compute
+\item{newdata}{data.frame of new covariate values for which to compute
 the bivariate conditional probability.}
 
-\item{v1_min}{lower limit of first response.}
+\item{v1_min}{vector of lower limits for first response.}
 
-\item{v1_max}{upper limit of first response.}
+\item{v1_max}{vector of upper limit for first response.}
 
-\item{v2_min}{lower limit of second response.}
+\item{v2_min}{vector of lower limit for second response.}
 
-\item{v2_max}{upper limit of second response.}
+\item{v2_max}{vector of upper limit for second response.}
 
 \item{cores}{integer; the number of cores to use for computations.}
 }
 \description{
-Calculates the bivariate conditional probability of the responses given the
-covariates.
+Calculates the bivariate conditional probability
+\deqn{P(v_{1, min} \leq V_1 \leq v_{1, max},
+v_{2, min} \leq V_2 \leq v_{2, max} | \mathbf{U} = \mathbf{u})}
+of the responses \eqn{(V_1, V_2)} given covariates with values
+\eqn{\mathbf{U} = \mathbf{u}} in the rectangle
+\eqn{[v_{1, min}, v_{1, max}] \times [v_{2, min}, v_{2, max}]}.
 }
 \details{
 This function double integrates the bivariate conditional density using the

@@ -1,11 +1,11 @@
 #' Bivariate conditional PDF
 #'
-#' Calculates the bivariate conditional density of the responses given the
-#' covariates.
+#' Calculates the bivariate conditional density \eqn{c_{V_1 V_2 | \mathbf{U}}}
+#' of the responses \eqn{(V_1, V_2)} given covariates \eqn{\mathbf{U}}.
 #'
 #' @param object an object of class \code{bivinereg}.
-#' @param newdata matrix of responses and covariate values for which to compute
-#'   the bivariate conditional density.
+#' @param newdata data.frame of new response and covariate values for which to
+#'   compute the bivariate conditional density.
 #' @param cores integer; the number of cores to use for computations.
 #'
 #' @examples
@@ -29,13 +29,14 @@ bicpdf <- function(object, newdata, cores = 1) {
 
 #' Marginal conditional PDF
 #'
-#' Calculates the marginal conditional density of a response given the
-#' covariates.
+#' Calculates the marginal conditional density \eqn{c_{V_i | \mathbf{U}}} of a
+#' response \eqn{V_i, i = 1, 2,} given covariates \eqn{\mathbf{U}}.
 #'
 #' @param object an object of class \code{bivinereg}.
-#' @param newdata matrix of response and covariate values for which to compute
-#'   the bivariate conditional density.
-#' @param margin integer; the margin for which to calculate the conditional PDF.
+#' @param newdata data.frame of new response and covariate values for which to
+#'   compute the marginal conditional density.
+#' @param margin integer; the margin (1 or 2) for which to calculate the
+#'   conditional PDF.
 #' @param cores integer; the number of cores to use for computations.
 #'
 #' @examples
@@ -59,13 +60,15 @@ mcpdf <- function(object, newdata, margin, cores = 1) {
 
 #' Marginal conditional CDF
 #'
-#' Calculates the marginal conditional distribution of a response given the
-#' covariates and other response.
+#' Calculates the marginal conditional distribution \eqn{C_{V_i | V_j, \mathbf{U}}}
+#' of a response \eqn{V_i, i = 1, 2,} given covariates \eqn{\mathbf{U}} and the
+#' other response \eqn{V_j, j \in \{1, 2\} \setminus \{i\}}.
 #'
 #' @param object an object of class \code{bivinereg}.
-#' @param newdata matrix of response and covariate values for which to compute
-#'   the marginal conditional distribution.
-#' @param margin integer; the margin for which to calculate the conditional CDF.
+#' @param newdata data.frame of new response and covariate values for which to
+#'   compute the marginal conditional distribution.
+#' @param margin integer; the margin (1 or 2) for which to calculate the
+#'   conditional CDF.
 #' @param cores integer; the number of cores to use for computations.
 #'
 #' @examples
@@ -89,12 +92,12 @@ mccdf <- function(object, newdata, margin, cores = 1) {
 
 #' Bivariate conditional CDF
 #'
-#' Calculates the bivariate conditional distribution of the responses given the
-#' covariates.
+#' Calculates the bivariate conditional distribution \eqn{C_{V_1 V_2 | \mathbf{U}}}
+#' of the responses \eqn{(V_1, V_2)} given covariates \eqn{\mathbf{U}}.
 #'
 #' @param object an object of class \code{bivinereg}.
-#' @param newdata matrix of response and covariate values for which to compute
-#'   the bivariate conditional distribution.
+#' @param newdata data.frame of new response and covariate values for which to
+#'   compute the bivariate conditional distribution.
 #' @param cores integer; the number of cores to use for computations.
 #'
 #' @importFrom stats integrate
@@ -133,16 +136,20 @@ biccdf_integrant <- function(v, newdata, object, cores) {
 
 #' Bivariate conditional probability
 #'
-#' Calculates the bivariate conditional probability of the responses given the
-#' covariates.
+#' Calculates the bivariate conditional probability
+#' \deqn{P(v_{1, min} \leq V_1 \leq v_{1, max},
+#' v_{2, min} \leq V_2 \leq v_{2, max} | \mathbf{U} = \mathbf{u})}
+#' of the responses \eqn{(V_1, V_2)} given covariates with values
+#' \eqn{\mathbf{U} = \mathbf{u}} in the rectangle
+#' \eqn{[v_{1, min}, v_{1, max}] \times [v_{2, min}, v_{2, max}]}.
 #'
 #' @param object an object of class \code{bivinereg}.
-#' @param newdata matrix of covariate values for which to compute
+#' @param newdata data.frame of new covariate values for which to compute
 #'   the bivariate conditional probability.
-#' @param v1_min lower limit of first response.
-#' @param v1_max upper limit of first response.
-#' @param v2_min lower limit of second response.
-#' @param v2_max upper limit of second response.
+#' @param v1_min vector of lower limits for first response.
+#' @param v1_max vector of upper limit for first response.
+#' @param v2_min vector of lower limit for second response.
+#' @param v2_max vector of upper limit for second response.
 #' @param cores integer; the number of cores to use for computations.
 #'
 #' @details
@@ -193,16 +200,20 @@ bicprob_integrant <- function(v1, v2, newdata, object, cores) {
 
 #' Bivariate conditional probability
 #'
-#' Calculates the bivariate conditional probability of the responses given the
-#' covariates.
+#' Calculates the bivariate conditional probability
+#' \deqn{P(v_{1, min} \leq V_1 \leq v_{1, max},
+#' v_{2, min} \leq V_2 \leq v_{2, max} | \mathbf{U} = \mathbf{u})}
+#' of the responses \eqn{(V_1, V_2)} given covariates with values
+#' \eqn{\mathbf{U} = \mathbf{u}} in the rectangle
+#' \eqn{[v_{1, min}, v_{1, max}] \times [v_{2, min}, v_{2, max}]}.
 #'
 #' @param object an object of class \code{bivinereg}.
-#' @param newdata matrix of covariate values for which to compute
+#' @param newdata data.frame of new covariate values for which to compute
 #'   the bivariate conditional probability.
-#' @param v1_min lower limit of first response.
-#' @param v1_max upper limit of first response.
-#' @param v2_min lower limit of second response.
-#' @param v2_max upper limit of second response.
+#' @param v1_min vector of lower limits for first response.
+#' @param v1_max vector of upper limit for first response.
+#' @param v2_min vector of lower limit for second response.
+#' @param v2_max vector of upper limit for second response.
 #' @param cores integer; the number of cores to use for computations.
 #'
 #' @details

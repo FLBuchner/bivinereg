@@ -9,14 +9,14 @@ bicpdf(object, newdata, cores = 1)
 \arguments{
 \item{object}{an object of class \code{bivinereg}.}
 
-\item{newdata}{matrix of responses and covariate values for which to compute
-the bivariate conditional density.}
+\item{newdata}{data.frame of new response and covariate values for which to
+compute the bivariate conditional density.}
 
 \item{cores}{integer; the number of cores to use for computations.}
 }
 \description{
-Calculates the bivariate conditional density of the responses given the
-covariates.
+Calculates the bivariate conditional density \eqn{c_{V_1 V_2 | \mathbf{U}}}
+of the responses \eqn{(V_1, V_2)} given covariates \eqn{\mathbf{U}}.
 }
 \examples{
 # load sample data

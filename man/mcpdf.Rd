@@ -9,16 +9,17 @@ mcpdf(object, newdata, margin, cores = 1)
 \arguments{
 \item{object}{an object of class \code{bivinereg}.}
 
-\item{newdata}{matrix of response and covariate values for which to compute
-the bivariate conditional density.}
+\item{newdata}{data.frame of new response and covariate values for which to
+compute the marginal conditional density.}
 
-\item{margin}{integer; the margin for which to calculate the conditional PDF.}
+\item{margin}{integer; the margin (1 or 2) for which to calculate the
+conditional PDF.}
 
 \item{cores}{integer; the number of cores to use for computations.}
 }
 \description{
-Calculates the marginal conditional density of a response given the
-covariates.
+Calculates the marginal conditional density \eqn{c_{V_i | \mathbf{U}}} of a
+response \eqn{V_i, i = 1, 2,} given covariates \eqn{\mathbf{U}}.
 }
 \examples{
 # load sample data

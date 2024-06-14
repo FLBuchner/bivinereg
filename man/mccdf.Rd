@@ -9,16 +9,18 @@ mccdf(object, newdata, margin, cores = 1)
 \arguments{
 \item{object}{an object of class \code{bivinereg}.}
 
-\item{newdata}{matrix of response and covariate values for which to compute
-the marginal conditional distribution.}
+\item{newdata}{data.frame of new response and covariate values for which to
+compute the marginal conditional distribution.}
 
-\item{margin}{integer; the margin for which to calculate the conditional CDF.}
+\item{margin}{integer; the margin (1 or 2) for which to calculate the
+conditional CDF.}
 
 \item{cores}{integer; the number of cores to use for computations.}
 }
 \description{
-Calculates the marginal conditional distribution of a response given the
-covariates and other response.
+Calculates the marginal conditional distribution \eqn{C_{V_i | V_j, \mathbf{U}}}
+of a response \eqn{V_i, i = 1, 2,} given covariates \eqn{\mathbf{U}} and the
+other response \eqn{V_j, j \in \{1, 2\} \setminus \{i\}}.
 }
 \examples{
 # load sample data
