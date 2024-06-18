@@ -4,7 +4,7 @@
 \alias{mccdf}
 \title{Marginal conditional CDF}
 \usage{
-mccdf(object, newdata, margin, cores = 1)
+mccdf(object, newdata, margin, inc_resp, cores = 1)
 }
 \arguments{
 \item{object}{an object of class \code{bivinereg}.}
@@ -15,12 +15,19 @@ compute the marginal conditional distribution.}
 \item{margin}{integer; the margin (1 or 2) for which to calculate the
 conditional CDF.}
 
+\item{inc_resp}{boolean; if set to \code{TRUE} includes the other response,
+which is not \code{margin} in the conditioning set to calculate
+\eqn{C_{V_i | V_j, \mathbf{U}}}.}
+
 \item{cores}{integer; the number of cores to use for computations.}
 }
 \description{
-Calculates the marginal conditional distribution \eqn{C_{V_i | V_j, \mathbf{U}}}
-of a response \eqn{V_i, i = 1, 2,} given covariates \eqn{\mathbf{U}} and the
-other response \eqn{V_j, j \in \{1, 2\} \setminus \{i\}}.
+Either calculates the marginal conditional distribution
+\eqn{C_{V_i | V_j, \mathbf{U}}} of a response \eqn{V_i, i = 1, 2,} given
+covariates \eqn{\mathbf{U}} and the other response
+\eqn{V_j, j \in \{1, 2\} \setminus \{i\}}, or the marginal conditional
+distribution \eqn{C_{V_i | \mathbf{U}}} of a response \eqn{V_i, i = 1, 2,}
+given covariates \eqn{\mathbf{U}}.
 }
 \examples{
 # load sample data
@@ -33,6 +40,9 @@ data(data)
                   selcrit = "bic"))
 
 # calculate the marginal conditional CDF of U1 given U4 and the covariates
-mccdf(fit, data[1:5,], margin = 1)
+mccdf(fit, data[1:5,], margin = 1, inc_resp = FALSE)
+
+# calculate the marginal conditional CDF of U1 given the covariates
+mccdf(fit, data[1:5,], margin = 1, inc_resp = TRUE)
 
 }

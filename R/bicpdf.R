@@ -60,15 +60,21 @@ mcpdf <- function(object, newdata, margin, cores = 1) {
 
 #' Marginal conditional CDF
 #'
-#' Calculates the marginal conditional distribution \eqn{C_{V_i | V_j, \mathbf{U}}}
-#' of a response \eqn{V_i, i = 1, 2,} given covariates \eqn{\mathbf{U}} and the
-#' other response \eqn{V_j, j \in \{1, 2\} \setminus \{i\}}.
+#' Either calculates the marginal conditional distribution
+#' \eqn{C_{V_i | V_j, \mathbf{U}}} of a response \eqn{V_i, i = 1, 2,} given
+#' covariates \eqn{\mathbf{U}} and the other response
+#' \eqn{V_j, j \in \{1, 2\} \setminus \{i\}}, or the marginal conditional
+#' distribution \eqn{C_{V_i | \mathbf{U}}} of a response \eqn{V_i, i = 1, 2,}
+#' given covariates \eqn{\mathbf{U}}.
 #'
 #' @param object an object of class \code{bivinereg}.
 #' @param newdata data.frame of new response and covariate values for which to
 #'   compute the marginal conditional distribution.
 #' @param margin integer; the margin (1 or 2) for which to calculate the
 #'   conditional CDF.
+#' @param inc_resp boolean; if set to \code{TRUE} includes the other response,
+#'   which is not \code{margin} in the conditioning set to calculate
+#'   \eqn{C_{V_i | V_j, \mathbf{U}}}.
 #' @param cores integer; the number of cores to use for computations.
 #'
 #' @examples
@@ -82,12 +88,19 @@ mcpdf <- function(object, newdata, margin, cores = 1) {
 #'                   selcrit = "bic"))
 #'
 #' # calculate the marginal conditional CDF of U1 given U4 and the covariates
-#' mccdf(fit, data[1:5,], margin = 1)
+#' mccdf(fit, data[1:5,], margin = 1, inc_resp = FALSE)
+#'
+#' # calculate the marginal conditional CDF of U1 given the covariates
+#' mccdf(fit, data[1:5,], margin = 1, inc_resp = TRUE)
 #'
 #' @export
-mccdf <- function(object, newdata, margin, cores = 1) {
+mccdf <- function(object, newdata, margin, inc_resp, cores = 1) {
   newdata <- prepare_newdata(newdata, object, use_response = TRUE)
-  cond_m_dist_cpp(as.matrix(newdata), object$vine, margin, cores)
+  if (inc_resp) {
+    return(cond_m_dist_cpp(as.matrix(newdata), object$vine, margin, cores))
+  } else {
+    return(cond_m2_dist_cpp(as.matrix(newdata), object$vine, margin - 1, cores))
+  }
 }
 
 #' Bivariate conditional CDF

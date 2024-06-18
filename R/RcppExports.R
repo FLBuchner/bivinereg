@@ -9,6 +9,10 @@ cond_m_dist_cpp <- function(u, vinecop_r, margin, num_threads) {
     .Call(`_bivinereg_cond_m_dist_cpp`, u, vinecop_r, margin, num_threads)
 }
 
+cond_m2_dist_cpp <- function(u, vinecop_r, margin, num_threads) {
+    .Call(`_bivinereg_cond_m2_dist_cpp`, u, vinecop_r, margin, num_threads)
+}
+
 cond_bi_dens_cpp <- function(u, vinecop_r, num_threads) {
     .Call(`_bivinereg_cond_bi_dens_cpp`, u, vinecop_r, num_threads)
 }

@@ -158,7 +158,6 @@ cond_m_dist_cpp(const Eigen::MatrixXd& u,
     } else {
       p.segment(b.begin, b.size) = hfunc1.col(0);
     }
-
   };
 
   RcppThread::ThreadPool pool((num_threads == 1) ? 0 : num_threads);
@@ -167,6 +166,77 @@ cond_m_dist_cpp(const Eigen::MatrixXd& u,
 
   return p;
 }
+
+// [[Rcpp::export]]
+Eigen::VectorXd
+cond_m2_dist_cpp(const Eigen::MatrixXd& u,
+                 const Rcpp::List& vinecop_r,
+                 const int margin,
+                 size_t num_threads)
+{
+  tools_eigen::check_if_in_unit_cube(u);
+  auto vinecop_cpp = vinecop_wrap(vinecop_r);
+  auto vine_struct_ = vinecop_cpp.get_rvine_structure();
+  auto d = vine_struct_.get_dim();
+  auto var_types_ = vinecop_cpp.get_var_types();
+  if ((static_cast<size_t>(u.cols()) != d) &&
+      (static_cast<size_t>(u.cols()) != 2 * d))
+    throw std::runtime_error("data dimension is incompatible with model.");
+
+  auto trunc_lvl = vine_struct_.get_trunc_lvl();
+  auto order = vine_struct_.get_order();
+  auto inverse_order = tools_stl::invert_permutation(order);
+  size_t margin2;
+  if (margin == 0) {
+    margin2 = 1;
+  } else {
+    margin2 = 0;
+  }
+
+  Eigen::VectorXd p(u.rows());
+  auto do_batch = [&](const tools_batch::Batch& b) {
+    Eigen::MatrixXd hfunc1, hfunc2, u_e;
+    hfunc1 = Eigen::MatrixXd::Zero(b.size, d);
+    hfunc2 = Eigen::MatrixXd::Zero(b.size, d);
+
+    // data have to be reordered to correspond to natural order
+    for (size_t j = 0; j < d; ++j) {
+      hfunc2.col(j) = u.block(b.begin, order[j] - 1, b.size, 1);
+    }
+
+    for (size_t tree = 0; tree < trunc_lvl - 1; ++tree) {
+      for (size_t edge = 0; edge < d - tree - 1; ++edge) {
+        if(edge != margin2) {
+          tools_interface::check_user_interrupt();
+          Bicop edge_copula = vinecop_cpp.get_pair_copula(tree, edge);
+          size_t m = vine_struct_.min_array(tree, edge);
+
+          u_e = Eigen::MatrixXd(b.size, 2);
+          u_e.col(0) = hfunc2.col(edge);
+          if (m == vine_struct_.struct_array(tree, edge, true)) {
+            u_e.col(1) = hfunc2.col(m - 1);
+          } else {
+            u_e.col(1) = hfunc1.col(m - 1);
+          }
+
+          if (vine_struct_.needed_hfunc1(tree, edge)) {
+            hfunc1.col(edge) = edge_copula.hfunc1(u_e);
+          }
+
+          hfunc2.col(edge) = edge_copula.hfunc2(u_e);
+        }
+      }
+    }
+    p.segment(b.begin, b.size) = hfunc2.col(margin);
+  };
+
+  RcppThread::ThreadPool pool((num_threads == 1) ? 0 : num_threads);
+  pool.map(do_batch, tools_batch::create_batches(u.rows(), num_threads));
+  pool.join();
+
+  return p;
+}
+
 
 // [[Rcpp::export]]
 Eigen::VectorXd
