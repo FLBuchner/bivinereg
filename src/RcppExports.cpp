@@ -88,6 +88,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cond_sample_cpp
+Eigen::MatrixXd cond_sample_cpp(const Eigen::MatrixXd& v, const Eigen::MatrixXd& u, const Rcpp::List& vinecop_r, size_t num_threads);
+RcppExport SEXP _bivinereg_cond_sample_cpp(SEXP vSEXP, SEXP uSEXP, SEXP vinecop_rSEXP, SEXP num_threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type v(vSEXP);
+    Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type u(uSEXP);
+    Rcpp::traits::input_parameter< const Rcpp::List& >::type vinecop_r(vinecop_rSEXP);
+    Rcpp::traits::input_parameter< size_t >::type num_threads(num_threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cond_sample_cpp(v, u, vinecop_r, num_threads));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_bivinereg_select_yvine_cpp", (DL_FUNC) &_bivinereg_select_yvine_cpp, 11},
@@ -95,6 +109,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_bivinereg_cond_m2_dist_cpp", (DL_FUNC) &_bivinereg_cond_m2_dist_cpp, 4},
     {"_bivinereg_cond_bi_dens_cpp", (DL_FUNC) &_bivinereg_cond_bi_dens_cpp, 3},
     {"_bivinereg_cond_m_dens_cpp", (DL_FUNC) &_bivinereg_cond_m_dens_cpp, 4},
+    {"_bivinereg_cond_sample_cpp", (DL_FUNC) &_bivinereg_cond_sample_cpp, 4},
     {NULL, NULL, 0}
 };
 

@@ -21,3 +21,7 @@ cond_m_dens_cpp <- function(u, vinecop_r, margin, num_threads) {
     .Call(`_bivinereg_cond_m_dens_cpp`, u, vinecop_r, margin, num_threads)
 }
 
+cond_sample_cpp <- function(v, u, vinecop_r, num_threads) {
+    .Call(`_bivinereg_cond_sample_cpp`, v, u, vinecop_r, num_threads)
+}
+

@@ -396,3 +396,75 @@ cond_m_dens_cpp(const Eigen::MatrixXd& u,
 
   return pdf;
 }
+
+// [[Rcpp::export]]
+Eigen::MatrixXd
+  cond_sample_cpp(const Eigen::MatrixXd& v,
+                  const Eigen::MatrixXd& u,
+                  const Rcpp::List& vinecop_r,
+                  size_t num_threads)
+  {
+    tools_eigen::check_if_in_unit_cube(u);
+    auto vinecop_cpp = vinecop_wrap(vinecop_r);
+    auto vine_struct_ = vinecop_cpp.get_rvine_structure();
+    auto d = vine_struct_.get_dim();
+    if ((static_cast<size_t>(u.cols()) != d) &&
+        (static_cast<size_t>(u.cols()) != 2 * d))
+      throw std::runtime_error("data dimension is incompatible with model.");
+
+    auto trunc_lvl = vine_struct_.get_trunc_lvl();
+    auto order = vine_struct_.get_order();
+    auto inverse_order = tools_stl::invert_permutation(order);
+    Eigen::MatrixXd samples = v;
+
+    TriangularArray<Eigen::VectorXd> hfunc2(d + 1, trunc_lvl + 1);
+    TriangularArray<Eigen::VectorXd> hfunc1(d + 1, trunc_lvl + 1);
+    // data have to be reordered to correspond to natural order
+    for (size_t j = 0; j < d; ++j) {
+      hfunc2(0, j) = u.col(order[j] - 1).segment(0, 1);
+      hfunc1(0, j) = u.col(order[j] - 1).segment(0, 1);
+    }
+
+    Eigen::MatrixXd u_e;
+    for (size_t tree = 0; tree < trunc_lvl - 1; ++tree) {
+      for (size_t edge = 2; edge < d - tree - 1; ++edge) {
+        auto edge_copula = vinecop_cpp.get_pair_copula(tree, edge);
+        size_t m = vine_struct_.min_array(tree, edge);
+        u_e = Eigen::MatrixXd(1, 2);
+        u_e.col(0) = hfunc2(tree, edge);
+        u_e.col(1) = hfunc1(tree, m - 1);
+        if (vine_struct_.needed_hfunc1(tree, edge)) {
+          hfunc1(tree + 1, edge) = edge_copula.hfunc1(u_e);
+        }
+        hfunc2(tree + 1, edge) = edge_copula.hfunc2(u_e);
+      }
+    }
+
+    for (size_t s = 0; s < static_cast<size_t>(samples.rows()); s++) {
+      hfunc2(trunc_lvl - 1, 1) = Eigen::VectorXd::Constant(1, v(s, 1));
+      for (ptrdiff_t tree = trunc_lvl - 2; tree >= 0; --tree) {
+        Bicop edge_copula = vinecop_cpp.get_pair_copula(tree, 1);
+        Eigen::MatrixXd U_e(1, 2);
+        U_e.col(0) = hfunc2(tree + 1, 1);
+        U_e.col(1) = hfunc1(tree, 2);
+        hfunc2(tree, 1) = edge_copula.hinv2(U_e);
+      }
+      samples(s, 1) = hfunc2(0, 1)[0];
+    }
+
+    for (size_t s = 0; s < static_cast<size_t>(samples.rows()); s++) {
+      Bicop edge_copula = vinecop_cpp.get_pair_copula(trunc_lvl - 1, 0);
+      Eigen::MatrixXd U_e(1, 2);
+      U_e = v.row(s);
+      hfunc2(trunc_lvl - 1, 0) = edge_copula.hinv2(U_e);
+      for (ptrdiff_t tree = trunc_lvl - 2; tree >= 0; --tree) {
+        Bicop edge_copula = vinecop_cpp.get_pair_copula(tree, 0);
+        Eigen::MatrixXd U_e(1, 2);
+        U_e.col(0) = hfunc2(tree + 1, 0);
+        U_e.col(1) = hfunc1(tree, 2);
+        hfunc2(tree, 0) = edge_copula.hinv2(U_e);
+      }
+      samples(s, 0) = hfunc2(0, 0)[0];
+    }
+    return samples;
+  }
