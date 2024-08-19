@@ -24,7 +24,14 @@
 #' @export
 bicpdf <- function(object, newdata, cores = 1) {
   newdata <- prepare_newdata(newdata, object, use_response = TRUE)
-  cond_bi_dens_cpp(as.matrix(newdata), object$vine, cores)
+  dens_marg <- if (inherits(object$margins[[1]], "kde1d")) {
+    kde1d::dkde1d(newdata[, 1], object$margins[[1]]) *
+      kde1d::dkde1d(newdata[, 2], object$margins[[2]])
+  } else {
+    1
+  }
+  newdata <- to_uscale(newdata, object$margins)
+  cond_bi_dens_cpp(as.matrix(newdata), object$vine, cores) * dens_marg
 }
 
 #' Marginal conditional PDF
@@ -55,7 +62,13 @@ bicpdf <- function(object, newdata, cores = 1) {
 #' @export
 mcpdf <- function(object, newdata, margin, cores = 1) {
   newdata <- prepare_newdata(newdata, object, use_response = TRUE)
-  cond_m_dens_cpp(as.matrix(newdata), object$vine, margin - 1, cores)
+  dens_marg <- if (inherits(object$margins[[margin]], "kde1d")) {
+    kde1d::dkde1d(newdata[, margin], object$margins[[margin]])
+  } else {
+    1
+  }
+  newdata <- to_uscale(newdata, object$margins)
+  cond_m_dens_cpp(as.matrix(newdata), object$vine, margin - 1, cores) * dens_marg
 }
 
 #' Marginal conditional CDF
@@ -96,6 +109,7 @@ mcpdf <- function(object, newdata, margin, cores = 1) {
 #' @export
 mccdf <- function(object, newdata, margin, inc_resp, cores = 1) {
   newdata <- prepare_newdata(newdata, object, use_response = TRUE)
+  newdata <- to_uscale(newdata, object$margins)
   if (inc_resp) {
     return(cond_m_dist_cpp(as.matrix(newdata), object$vine, margin, cores))
   } else {
@@ -123,7 +137,8 @@ mccdf <- function(object, newdata, margin, inc_resp, cores = 1) {
 #' (fit <- bivinereg(cbind(U1,U4) ~ U2 + U3 + U5 + U6,
 #'                   data = data,
 #'                   family_set = "parametric",
-#'                   selcrit = "bic"))
+#'                   selcrit = "bic",
+#'                   uscale = TRUE   ))
 #'
 #' # calculate the bivariate conditional CDF
 #' biccdf(fit, data[1:5,])
@@ -131,6 +146,7 @@ mccdf <- function(object, newdata, margin, inc_resp, cores = 1) {
 #' @export
 biccdf <- function(object, newdata, cores = 1) {
   newdata <- prepare_newdata(newdata, object, use_response = TRUE)
+  newdata <- to_uscale(newdata, object$margins)
   out <- NA
   for (i in 1:nrow(newdata)) {
     out[i] <- integrate(biccdf_integrant, 0, newdata[i, 1],
@@ -190,6 +206,7 @@ biccdf_integrant <- function(v, newdata, object, cores) {
 bicprob <- function(object, newdata, v1_min, v1_max, v2_min, v2_max, cores = 1)
 {
   newdata <- prepare_newdata(newdata, object)
+  newdata <- to_uscale(newdata, object$margins)
   out <- NA
   for (i in 1:nrow(newdata)) {
     out[i] <- integral2(bicprob_integrant,
@@ -256,6 +273,7 @@ bicprob_integrant <- function(v1, v2, newdata, object, cores) {
 bicprob2 <- function(object, newdata, v1_min, v1_max, v2_min, v2_max, cores = 1)
 {
   newdata <- prepare_newdata(newdata, object)
+  newdata <- to_uscale(newdata, object$margins)
   out <- NA
   for (i in 1:nrow(newdata)) {
     out[i] <- hcubature(bicprob_integrant2,

@@ -12,7 +12,9 @@ Description:
 License: GPL-3
 Imports: 
   rvinecopulib (>= 0.6.1.1.2), 
+  kde1d (>= 1.0.2),
   Rcpp,
+  assertthat,
   pracma,
   cubature
 LinkingTo: 
@@ -21,7 +23,8 @@ LinkingTo:
   Rcpp, 
   BH,
   wdm,
-  RcppThread
+  RcppThread,
+  kde1d
 RoxygenNote: 7.3.1
 Roxygen: list(markdown = TRUE)
 Suggests: 
