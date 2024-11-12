@@ -10,15 +10,20 @@
 #' @param selcrit selection criterion based on conditional log-likelihood.
 #'   \code{"loglik"} (default) imposes no correction; other choices are
 #'   \code{"aic"} and \code{"bic"}.
+#' @param par_1d list of options passed to [kde1d::kde1d()], must be one value
+#'   for each margin, e.g. `list(xmin = c(0, 0, NaN))` if the responses have
+#'   non-negative support.
 #' @param weights optional vector of weights for each observation.
 #' @param cores integer; the number of cores to use for computations.
 #' @param ... further arguments passed to [rvinecopulib::bicop()].
+#' @param uscale if TRUE, bivinereg assumes that marginal distributions have been
+#'   taken care of in a preliminary step.
 #'
 #' @return An object of class bivinereg. It is a list containing the elements
 #'   \describe{ \item{formula}{the formula used for the fit.}
 #'   \item{selcrit}{criterion used for variable selection.}
 #'   \item{model_frame}{the data used to fit the regression model.}
-#'   \item{margins}{list of marginal models (not used).}
+#'   \item{margins}{list of marginal models.}
 #'   \item{vine}{an [rvinecopulib::vinecop_dist()] object containing the fitted
 #'   Y-vine.} \item{stats}{fit statistics such as conditional
 #'   log-likelihood/AIC/BIC and p-values for each variable's contribution.}
@@ -41,20 +46,23 @@
 #' (fit <- bivinereg(cbind(U1,U4) ~ U2 + U3 + U5 + U6,
 #'                   data = data,
 #'                   family_set = "parametric",
-#'                   selcrit = "bic"))
+#'                   selcrit = "bic",
+#'                   uscale = TRUE))
 #'
 #' # inspect model
 #' summary(fit)
 #'
 #' @export
 #'
+#' @importFrom kde1d kde1d pkde1d
 #' @importFrom stats model.frame logLik model.extract
 #' @importFrom utils modifyList
 #' @importFrom rvinecopulib bicop vinecop
 #' @importFrom Rcpp sourceCpp
 #' @useDynLib bivinereg, .registration = TRUE
 bivinereg <- function(formula, data, family_set = "parametric", selcrit = "aic",
-                      weights = numeric(), cores = 1, ...) {
+                      par_1d = list(), weights = numeric(),
+                      cores = 1, ..., uscale = FALSE) {
   # remove unused variables
   if (!missing(data)) {
     mf <- model.frame(formula, data)
@@ -65,6 +73,7 @@ bivinereg <- function(formula, data, family_set = "parametric", selcrit = "aic",
     stop("responses must be numeric")
 
   mfx <- expand_factors(mf)
+  colnames(mfx)[1:2] <- colnames(model.extract(mf, "response"))
   d <- ncol(mfx)
   var_types <- rep("c", d)
 
@@ -86,12 +95,25 @@ bivinereg <- function(formula, data, family_set = "parametric", selcrit = "aic",
     modifyList(arg, list(...))
   )$controls
   ctrl$weights <- numeric()
-
-  # We assume no order given and data is on uscale
-  # Can add not uscale and given order later
-  margins <- lapply(1:d, function(x) list(edf = NA, loglik = NA))
-  u <- as.matrix(mfx)
-  colnames(u)[1:2] <- colnames(model.extract(mf, "response"))
+  # We assume no order given
+  # Can add given order later
+  if (!uscale) {
+    par_1d <- process_par_1d(mfx, par_1d)
+    margins <- fit_margins_cpp(prep_for_kde1d(mfx),
+                               sapply(mfx, nlevels),
+                               mult = par_1d$mult,
+                               xmin = par_1d$xmin,
+                               xmax = par_1d$xmax,
+                               bw = par_1d$bw,
+                               deg = par_1d$deg,
+                               weights = weights,
+                               cores)
+    margins <- finalize_margins(margins, mfx)
+    u <- to_uscale(mfx, margins)
+  } else {
+    margins <- lapply(1:d, function(x) list(edf = NA, loglik = NA))
+    u <- as.matrix(mfx)
+  }
 
   args <- modifyList(
     ctrl,
@@ -100,6 +122,9 @@ bivinereg <- function(formula, data, family_set = "parametric", selcrit = "aic",
 
   fit <- do.call(select_yvine_cpp, args)
 
+  if (!uscale)
+    margins <- margins[c(1:2, sort(fit$selected_vars))] # other margins useless
+
   finalize_bivinereg_object(
     formula = formula,
     selcrit = selcrit,
@@ -107,7 +132,7 @@ bivinereg <- function(formula, data, family_set = "parametric", selcrit = "aic",
     margins = margins,
     vine = fit$vine,
     selected_vars = fit$selected_vars,
-    var_nms = colnames(u)
+    var_nms = colnames(mfx)
   )
 }
 

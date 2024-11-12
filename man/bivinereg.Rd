@@ -9,9 +9,11 @@ bivinereg(
   data,
   family_set = "parametric",
   selcrit = "aic",
+  par_1d = list(),
   weights = numeric(),
   cores = 1,
-  ...
+  ...,
+  uscale = FALSE
 )
 }
 \arguments{
@@ -26,18 +28,25 @@ the variables in the model.}
 \code{"loglik"} (default) imposes no correction; other choices are
 \code{"aic"} and \code{"bic"}.}
 
+\item{par_1d}{list of options passed to \code{\link[kde1d:kde1d]{kde1d::kde1d()}}, must be one value
+for each margin, e.g. \code{list(xmin = c(0, 0, NaN))} if the responses have
+non-negative support.}
+
 \item{weights}{optional vector of weights for each observation.}
 
 \item{cores}{integer; the number of cores to use for computations.}
 
 \item{...}{further arguments passed to \code{\link[rvinecopulib:bicop]{rvinecopulib::bicop()}}.}
+
+\item{uscale}{if TRUE, bivinereg assumes that marginal distributions have been
+taken care of in a preliminary step.}
 }
 \value{
 An object of class bivinereg. It is a list containing the elements
 \describe{ \item{formula}{the formula used for the fit.}
 \item{selcrit}{criterion used for variable selection.}
 \item{model_frame}{the data used to fit the regression model.}
-\item{margins}{list of marginal models (not used).}
+\item{margins}{list of marginal models.}
 \item{vine}{an \code{\link[rvinecopulib:vinecop_dist]{rvinecopulib::vinecop_dist()}} object containing the fitted
 Y-vine.} \item{stats}{fit statistics such as conditional
 log-likelihood/AIC/BIC and p-values for each variable's contribution.}
@@ -60,7 +69,8 @@ data(data)
 (fit <- bivinereg(cbind(U1,U4) ~ U2 + U3 + U5 + U6,
                   data = data,
                   family_set = "parametric",
-                  selcrit = "bic"))
+                  selcrit = "bic",
+                  uscale = TRUE))
 
 # inspect model
 summary(fit)
