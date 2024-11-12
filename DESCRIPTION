@@ -14,9 +14,7 @@ Imports:
   rvinecopulib (>= 0.6.1.1.2), 
   kde1d (>= 1.0.2),
   Rcpp,
-  assertthat,
-  pracma,
-  cubature
+  assertthat
 LinkingTo: 
   rvinecopulib, 
   RcppEigen, 

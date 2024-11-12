@@ -23,7 +23,7 @@ of the responses \eqn{(V_1, V_2)} given covariates \eqn{\mathbf{U}}.
 data(data)
 
 # fit vine regression model
-(fit <- bivinereg(cbind(U1,U4) ~ U2 + U3 + U5 + U6,
+(fit <- bivinereg(cbind(U1, U4) ~ U2 + U3 + U5 + U6,
                   data = data,
                   family_set = "parametric",
                   selcrit = "bic",
