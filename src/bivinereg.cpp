@@ -618,7 +618,7 @@ Eigen::MatrixXd
           u.col(d + order[j] - 1).segment(0, 1);
       }
     }
-    std::cout << "hello1 \n";
+;
     Eigen::MatrixXd u_e, u_e_sub;
     for (size_t tree = 0; tree < trunc_lvl - 1; ++tree) {
       for (size_t edge = 2; edge < d - tree - 1; ++edge) {
@@ -654,7 +654,7 @@ Eigen::MatrixXd
         }
       }
     }
-    std::cout << "hello2 \n";
+
     for (size_t s = 0; s < static_cast<size_t>(samples.rows()); s++) {
       hfunc2(trunc_lvl - 1, 1) = Eigen::VectorXd::Constant(1, v(s, 1));
       for (ptrdiff_t tree = trunc_lvl - 2; tree >= 0; --tree) {
@@ -671,7 +671,6 @@ Eigen::MatrixXd
       }
       samples(s, 1) = hfunc2(0, 1)[0];
     }
-    std::cout << "hello3 \n";
 
     for (size_t s = 0; s < static_cast<size_t>(samples.rows()); s++) {
       Bicop edge_copula = vinecop_cpp.get_pair_copula(trunc_lvl - 1, 0);
