@@ -4,12 +4,28 @@ prepare_newdata <- function(newdata, object, use_response = FALSE) {
   newdata <- as.data.frame(newdata)
   if (!use_response) {
     object$model_frame <- object$model_frame[-1]
-    names_ <- names(object$model_frame)
+    vars <- names(object$model_frame)
   } else {
-    names_ <- object$vine$names
+    vars <- c(colnames(model.extract(object$model_frame, "response")),
+              names(object$model_frame)[-1])
   }
-  check_var_availability(newdata, names_)
+  check_newdata(newdata, object, vars, use_response)
+  # factors must be expanded to dummy numeric variables
+  newdata <- expand_factors(newdata)
   newdata <- remove_unused(newdata, object, use_response)
+}
+
+#' checks if newdata has appropriate columns and sorts according to the order
+#' used for fitting.
+#' @noRd
+check_newdata <- function(newdata, object, vars, use_response) {
+  check_var_availability(newdata, vars)
+
+  # the check_x functions expect variables in newdata and model_frame in
+  # the same order
+  newdata <- newdata[vars]
+  check_types(newdata, object$model_frame, use_response)
+  check_levels(newdata, object$model_frame)
 }
 
 #' checks if all *selected* covariates are in newdata.
@@ -21,6 +37,65 @@ check_var_availability <- function(newdata, vars) {
     stop("'newdata' is missing variables ", vars_missing)
   }
 }
+
+#' checks if variable types are equal in original data and new data.
+#' @importFrom utils capture.output
+#' @noRd
+check_types <- function(actual, expected, use_response) {
+  different_type <- sapply(
+    seq_along(actual),
+    function(i) {
+      if (use_response) {
+        if (i > 2) {
+          return(!identical(class(actual[[i]])[1], class(expected[[i - 1]])[1]))
+        } else {
+          return(!identical(class(actual[[i]])[1], class(expected[[1]][i])[1]))
+        }
+      } else {
+        return(!identical(class(actual[[i]])[1], class(expected[[i]])[1]))
+      }
+    }
+  )
+  if (any(different_type)) {
+    errors <- data.frame(
+      expected = sapply(actual[different_type], function(x) class(x)[1]),
+      actual = sapply(expected[different_type], function(x) class(x)[1])
+    )
+    errors <- paste(capture.output(print(errors)), collapse = "\n")
+    stop("some columns have incorrect type:\n", errors, call. = FALSE)
+  }
+}
+
+#' checks if factor levels are equal in original data and new data.
+#' @noRd
+check_levels <- function(actual, expected) {
+  # only check factors
+  actual <- actual[sapply(actual, is.factor)]
+  expected <- expected[sapply(expected, is.factor)]
+  if (length(expected) == 0) {
+    return(TRUE)
+  }
+
+  different_levels <- sapply(
+    seq_along(actual),
+    function(i) !identical(levels(actual[[i]]), levels(expected[[i]]))
+  )
+  if (any(different_levels)) {
+    errors <- data.frame(
+      expected = sapply(
+        actual[different_levels],
+        function(x) paste(levels(x), collapse = ",")
+      ),
+      actual = sapply(
+        expected[different_levels],
+        function(x) paste(levels(x), collapse = ",")
+      )
+    )
+    errors <- paste(capture.output(print(errors)), collapse = "\n")
+    stop("some factors have incorrect levels\n", errors, call. = FALSE)
+  }
+}
+
 
 #' removes unused variables and returns newdata in the order used for fitting.
 #' @noRd
@@ -179,7 +254,7 @@ to_uscale <- function(data, margins, add_response = FALSE) {
   if (add_response) {
     u <- c(list(0.5), list(0.5), u)
     if (length(u_sub) > 0)
-      u_sub <- c(list(0.5), u_sub)
+      u_sub <- c(list(0.5), list(0.5), u_sub)
   }
   u <- truncate_u(cbind(do.call(cbind, u), do.call(cbind, u_sub)))
   if ((length(u) == 1) & (NROW(data) > 1))
