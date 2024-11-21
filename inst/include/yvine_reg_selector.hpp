@@ -31,6 +31,7 @@ struct DVineFitTemporaries
   std::vector<Eigen::VectorXd> hfunc1_sub;
   std::vector<Eigen::VectorXd> hfunc2_sub;
   Eigen::VectorXd hfunc2_resp;
+  Eigen::VectorXd hfunc2_resp_sub;
   std::vector<Bicop> pcs;
   std::vector<size_t> remaining_vars;
   std::vector<size_t> selected_vars;
@@ -115,7 +116,7 @@ inline YVineRegSelector::YVineRegSelector(
 {
   fit1_.hfunc1.resize(p_);
   fit1_.hfunc2.resize(p_);
-  fit1_.hfunc1_sub.resize(p_); // sub only for discrete I think
+  fit1_.hfunc1_sub.resize(p_);
   fit1_.hfunc2_sub.resize(p_);
   fit1_.pcs.resize(p_);
   fit1_.remaining_vars = tools_stl::seq_int(2, p_);
@@ -124,6 +125,7 @@ inline YVineRegSelector::YVineRegSelector(
 
   fit1_.hfunc2[0] = data_.col(0);
   fit1_.hfunc2_resp = data_.col(0);
+  fit1_.hfunc2_resp_sub = data_.col(0);
 
   fit2_.hfunc1.resize(p_);
   fit2_.hfunc2.resize(p_);
@@ -135,7 +137,8 @@ inline YVineRegSelector::YVineRegSelector(
   fit2_.crit = 0.0;
 
   fit2_.hfunc2[0] = data_.col(1);
-  fit2_.hfunc2_resp = data_.col(2);
+  fit2_.hfunc2_resp = data_.col(1);
+  fit2_.hfunc2_resp_sub = data_.col(1);
 }
 
 
@@ -185,9 +188,18 @@ inline void YVineRegSelector::select_model()
   u_e.col(0) = fit1_.hfunc2_resp;
   u_e.col(1) = fit2_.hfunc2_resp;
 
-  std::vector<std::string> var_types;
-  var_types.push_back("c");
-  var_types.push_back("c");
+  // if (var_types_[0] == "d" | var_types_[1] == "d") {
+  //   u_e.conservativeResize(u_e.rows(), 4);
+  //   // use dummys for _sub data if variable is not discrete
+  //   u_e.col(2) =
+  //     fit1_.hfunc2_resp_sub.size() ? fit1_.hfunc2_resp_sub : fit1_.hfunc2_resp;
+  //   u_e.col(3) =
+  //     fit2_.hfunc2_resp_sub.size() ? fit2_.hfunc2_resp_sub : fit2_.hfunc2_resp;
+  // }
+
+  std::vector<std::string> var_types(2);
+  var_types[0] = var_types_[0];
+  var_types[1] = var_types_[1];
 
   Bicop pc_final;
 
@@ -224,12 +236,12 @@ inline void YVineRegSelector::initialize_var(DVineFitTemporaries& fit1,
                                              size_t var) const
 {
   fit1.hfunc1[0] = data_.col(var);
-  fit1.hfunc1_sub[0] =
-    (var_types_[var] == "d") ? data_.col(p_ + 1 + var) : Eigen::VectorXd();
 
+  fit1.hfunc1_sub[0] =
+    (var_types_[var] == "d") ? data_.col(p_ + 2 + var) : Eigen::VectorXd(); // +2 ?
   fit2.hfunc1[0] = data_.col(var);
   fit2.hfunc1_sub[0] =
-    (var_types_[var] == "d") ? data_.col(p_ + 1 + var) : Eigen::VectorXd();
+    (var_types_[var] == "d") ? data_.col(p_ + 2 + var) : Eigen::VectorXd(); // +2 ?
 }
 
 // obtain variable types for the new edge in tree t
@@ -291,6 +303,13 @@ inline void YVineRegSelector::update_hfunc1(DVineFitTemporaries& fit,
                                             const Eigen::MatrixXd& u_e) const
 {
   fit.hfunc2_resp = fit.pcs[t].hfunc2(u_e);
+  // if (fit.hfunc2_resp_sub.size()) { // first variable is discrete
+  //   auto u_e_sub = u_e;
+  //   u_e_sub.col(0) = u_e.col(2);
+  //   fit.hfunc2_resp_sub = fit.pcs[t].hfunc2(u_e_sub);
+  // } else {
+  //   fit.hfunc2_resp_sub = Eigen::VectorXd();
+  // }
   if (p_ == t + 1) { // selection is complete
     return;
   } else {
@@ -321,7 +340,7 @@ inline void YVineRegSelector::update_hfunc1(DVineFitTemporaries& fit1,
     fit2.hfunc1_sub[t + 1] = fit1.hfunc1_sub[t + 1];
   } else {
     fit1.hfunc1_sub[t + 1] = Eigen::VectorXd();
-    fit2.hfunc1_sub[t + 1] = fit1.hfunc1_sub[t + 1];
+    fit2.hfunc1_sub[t + 1] = Eigen::VectorXd();
   }
 }
 

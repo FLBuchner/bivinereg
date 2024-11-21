@@ -71,11 +71,14 @@ bivinereg <- function(formula, data, family_set = "parametric", selcrit = "aic",
   }
   if (!is.numeric(mf[[1]][,1]) | !is.numeric(mf[[1]][,2]))
     stop("responses must be numeric")
+  if (any(sapply(mf, is.factor)) && uscale)
+    stop("factors are not allowed with uscale = TRUE")
 
   mfx <- expand_factors(mf)
   colnames(mfx)[1:2] <- colnames(model.extract(mf, "response"))
   d <- ncol(mfx)
   var_types <- rep("c", d)
+  var_types[sapply(mfx, is.ordered)] <- "d"
 
   ## prepare fit controls (little hack calling bicop() for all checks)
   arg <- list(
