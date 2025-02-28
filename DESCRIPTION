@@ -1,7 +1,7 @@
 Package: bivinereg
 Type: Package
 Title: Y-Vine Regression
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: c(
         person("Ferdinand", "Buchner",, "f.buchner@tum.de", role = c("aut", "cre"))
         )
@@ -14,7 +14,9 @@ Imports:
   rvinecopulib (>= 0.6.1.1.2), 
   kde1d (>= 1.0.2),
   Rcpp,
-  assertthat
+  assertthat,
+  ggplot2,
+  ggdensity
 LinkingTo: 
   rvinecopulib, 
   RcppEigen, 
@@ -23,12 +25,11 @@ LinkingTo:
   wdm,
   RcppThread,
   kde1d
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Roxygen: list(markdown = TRUE)
 Suggests: 
   knitr,
   rmarkdown,
-  ggplot2,
   AppliedPredictiveModeling,
   quantreg,
   tidyr,
